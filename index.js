@@ -153,6 +153,18 @@ app.patch('/saveContact/:id' , async(req, res) => {
     }
 })
 
+app.patch('/removeBookmark/:id' , async(req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+    try {
+        const result = await contactsCollection.findOneAndUpdate(query, { $set: { bookmarked: false } });
+        res.send(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error);
+    }
+})
+
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
