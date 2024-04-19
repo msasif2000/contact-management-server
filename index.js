@@ -100,6 +100,19 @@ app.post('/addContact', async(req, res) => {
       }
 })
 
+//get all contacts
+app.get('/allContacts/:email' , async(req, res) => {
+    const email = req.params.email;
+    const query = { userEmail: email };
+    try {
+      const contacts = await contactsCollection.find(query).toArray();
+      res.send(contacts);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send(error);
+    }
+})
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
