@@ -33,7 +33,7 @@ const dbConnect = async () => {
   }
 }
 dbConnect()
-const contactCollection = client.db("Cellio-Contact").collection("Contacts");
+const contactsCollection = client.db("Cellio-Contact").collection("Contacts");
 const usersCollection = client.db("Cellio-Contact").collection("Users");
 
 app.get('/', (req, res) => {
@@ -61,6 +61,45 @@ app.post('/users', async(req, res) => {
         res.status(500).json({ message: "Internal server error" });
       }
 })
+
+app.get('/user-profile/:email', async(req, res) => {
+    const email = req.params.email;
+    const query = { email: email };
+    try {
+      const existingUser = await usersCollection.findOne(query);
+      if (!existingUser) {
+        return res.status(404).send({ message: "User not found" });
+      }
+      const user = await usersCollection.findOne(query);
+      res.send(user);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send(error);
+    }
+})
+
+app.post('/addContact', async(req, res) => {
+    const newContact = req.body;
+    const query = { phone: newContact.phone };
+    try {
+        const existingContact = await contactsCollection.findOne(query);
+    
+        if (existingContact) {
+          return res.status(409).json({ message: "Contact already exists" });
+        }
+    
+        const result = await contactsCollection.insertOne(newContact);
+    
+        res.status(201).json({
+          contactId: result.insertedId,
+          message: "Contact created successfully",
+        });
+      } catch (error) {
+        console.error("Error creating contact:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+})
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
